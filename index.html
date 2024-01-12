@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ user.username }} - Информация о подписке</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            line-height: 1.5;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            font-feature-settings: normal;
+            font-variation-settings: normal;
+        }
+
+        body {
+            height: 100%;
+            min-height: 100vh;
+            line-height: inherit;
+            background: #fff;
+            padding: 0 0 30px;
+            margin: 0;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: inherit;
+        }
+
+        .container {
+            width: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .container {
+                max-width: 640px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 768px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1024px;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .container {
+                max-width: 1280px;
+            }
+        }
+
+        @media (min-width: 1536px) {
+            .container {
+                max-width: 1536px;
+            }
+        }
+
+    </style>
+
+    <!-- <link rel="stylesheet" href="../output.css"> -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.7.3/dist/full.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/shabnam-font@v5.0.1/dist/font-face.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs-i18n@2.4.0/dist/cdn.min.js"></script>
+    <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.lordicon.com/bhenfmcm.js"></script>
+    <link href="https://fonts.cdnfonts.com/css/be-vietnam-pro" rel="stylesheet">
+    <script defer src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script defer>
+        const sub = "{{ user.subscription_url }}"
+        let fullUrl = `${window.location.origin}{{ user.subscription_url }}`;
+        if (sub.startsWith("http")) {
+            fullUrl = sub;
+        }
+
+        function setHrefs() {
+            document.getElementById("ios-streisand").href = `streisand://import/${fullUrl}`;
+            document.getElementById("ios-v2box").href = `v2box://install-sub?url=${fullUrl}&name=Sub`;
+            document.getElementById("android-v2rayng").href = `v2rayng://install-config?url=${fullUrl}`;
+            document.getElementById("windows-clashverge").href = `clash://install-config?url=${fullUrl}`;
+        }
+
+        function copyToClipboard(e, textToCopy) {
+            if (e) {
+                const copyCfgBtn = e.target.closest('.btnCopy')
+                const defaultContent = copyCfgBtn.innerHTML;
+                copyCfgBtn.innerHTML = `<lord-icon class="w-8 h-8" src="https://cdn.lordicon.com/jvihlqtw.json" trigger="loop"
+                                delay="1" colors="primary:#fff,secondary:#fff">
+                            </lord-icon>`
+
+                setTimeout(function () {
+                    copyCfgBtn.innerHTML = defaultContent;
+                }, 2000);
+            }
+            // Create a temporary text area element
+            const textArea = document.createElement("textarea");
+
+            // Set the text content to be copied
+            textArea.value = textToCopy;
+
+            // Append the text area to the DOM
+            document.body.appendChild(textArea);
+
+            // Select the text in the text area
+            textArea.select();
+
+            try {
+                // Attempt to copy the selected text to the clipboard
+                document.execCommand("copy");
+            } catch (err) {
+                console.error("Unable to copy text to clipboard:", err);
+            } finally {
+                // Remove the temporary text area element
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function iOSversion() {
+            if (/iP(hone|od|ad)/.test(navigator.platform)) {
+                // supports iOS 2.0 and later: <http://bit.ly/TJjs1V>
+                var v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
+                return `${parseInt(v[1], 10)}.${parseInt(v[2], 10)}.${parseInt(v[3] || 0, 10)}`;
+            }
+        }
+
+        function calculatePercentage(used, limit) {
+            const parsedUsed = parseFloat(used);
+            const parsedLimit = parseFloat(limit);
+
+            if (isNaN(parsedUsed) || isNaN(parsedLimit)) {
+                return 0; // Handle invalid input
+            }
+
+            const usagePercentage = (parsedUsed / parsedLimit) * 100;
+            return Math.min(usagePercentage, 100).toFixed(1); // Cap at 100%
+        }
+        function getChartColor(percentage) {
+            return percentage < 40 ? 'text-green-500' : percentage < 80 ? 'text-yellow-600' : 'text-red-500';
+        }
+
+        function openFoXrayURL() {
+            var currentURL = window.location.href;
+            var encodedURL = btoa(currentURL);
+            var foXrayURL = 'foxray://yiguo.dev/sub/add/?url=' + encodedURL + '#name';
+            window.location.href = foXrayURL;
+        }
+
+        function openShadowrocketURL() {
+            var currentURL = window.location.href;
+            var encodedURL = btoa(currentURL);
+            var shadowrocketLink = 'sub://' + encodedURL;
+            window.location.href = shadowrocketLink;
+        }
+        
+
+        function openDynamicModal(title, url) {
+            var modal = document.getElementById("QrModal");
+            let qrSize = window.innerWidth > 450 ? (window.innerHeight > 450 ? 400 : window.innerHeight - 200) : window.innerHeight > 450 ? window.innerWidth - 100 : window.innerHeight - 200;
+            window.resizeTo(function () {
+                qrSize = window.innerWidth > 450 ? (window.innerHeight > 450 ? 400 : window.innerHeight - 200) : window.innerHeight > 450 ? window.innerWidth - 100 : window.innerHeight - 200;
+            }, function () {
+                qrSize = window.innerWidth > 450 ? (window.innerHeight > 450 ? 400 : window.innerHeight - 200) : window.innerHeight > 450 ? window.innerWidth - 100 : window.innerHeight - 200;
+            });
+
+            var modalTitle = document.getElementById("modalTitle");
+            document.getElementById("qrcode").innerHTML = ''
+            new QRCode(document.getElementById("qrcode"), {
+                text: url,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                width: qrSize,
+                height: qrSize,
+                correctLevel: QRCode.CorrectLevel.L
+            });
+
+            // Set dynamic content
+            modalTitle.innerText = title;
+            // Show the modal
+            modal.click()
+            // modal.checked = true;
+        }
+
+        function extractNameFromConfigURL(url) {
+            const namePattern = /#([^#]*)/;
+            const match = url.match(namePattern);
+
+            if (match) {
+                const name = decodeURIComponent(match[1]);
+                return name;
+            } else if (url.startsWith("vmess://")) {
+                const encodedString = url.replace("vmess://", "");
+                const decodedString = atob(encodedString);
+                return JSON.parse(decodedString).ps
+            }
+            else {
+                return null; // Return null if the pattern doesn't match
+            }
+        }
+
+function detectOS() {
+  const userAgent = navigator.userAgent.toLowerCase();
+
+  if (userAgent.includes('win')) {
+    return 'Windows';
+  } else if (userAgent.includes('mac') && !userAgent.includes('iphone') && !userAgent.includes('ipad')) {
+    return 'macOS';
+  } else if (userAgent.includes('android')) {
+    return 'Android';
+  } else if (userAgent.includes('linux')) {
+    return 'Linux';
+  } else if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+    return 'iOS';
+  } else {
+    return 'Unknown';
+  }
+}
+
+
+        window
+            .matchMedia("(prefers-color-scheme: dark)")
+            .addEventListener("change", function (e) {
+                // getQrIcon()
+            });
+
+        // function getQrIcon() {
+        //     let dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        //     const btnQr = document.getElementById('qrIconBtn')
+        //     const btnCfgs = document.getElementById('myConfigsContainer')
+        //     btnQr.innerHTML = ""
+        //     btnCfgs.innerHTML = ""
+
+
+        //     if (dark) {
+        //         btnQr.innerHTML = `<lord-icon src="https://cdn.lordicon.com/fqrjldna.json" trigger="loop" delay="2000"
+                           
+        //                    colors="primary:#fff,secondary:#fff"
+        //                         class="w-10 h-10">
+        //                    </lord-icon>`
+        //         btnCfgs.innerHTML = `<lord-icon class="w-8 h-8" src="https://cdn.lordicon.com/gqzfzudq.json"
+        //                                         trigger="loop" delay="2000" colors="primary:#fff,secondary:#fff">
+        //                                     </lord-icon>`
+        //     } else {
+        //         btnQr.innerHTML = `<lord-icon src="https://cdn.lordicon.com/fqrjldna.json" trigger="loop" delay="2000"
+                           
+        //                    colors="primary:#000,secondary:#000"
+        //                         class="w-10 h-10">
+        //                    </lord-icon>`
+        //         btnCfgs.innerHTML = `<lord-icon class="w-8 h-8" src="https://cdn.lordicon.com/gqzfzudq.json"
+        //                                         trigger="loop" delay="2000" colors="primary:#000,secondary:#000">
+        //                                     </lord-icon>`
+        //     }
+        //     return
+        // }
+
+        function renderOS() {
+            const userOS = detectOS();
+
+            const container = document.getElementById('OsContainer');
+            const iosDiv = document.getElementById('iOSContainer');
+            const MacDiv = document.getElementById('MacOSContainer');
+            const androidDiv = document.getElementById('AndroidContainer');
+            const windowsDiv = document.getElementById('WindowsContainer');
+
+            // Reorder the div elements based on the detected OS
+            switch (userOS) {
+                case 'iOS':
+                    container.removeChild(iosDiv);
+                    container.insertBefore(iosDiv, container.firstChild);
+                    const iosFirstChildDiv = iosDiv.querySelector('div');
+                    if (iosFirstChildDiv) {
+                        iosFirstChildDiv.setAttribute('x-data', '{ expanded: true }');
+                    }
+                    break;
+                case 'MacOS':
+                    container.removeChild(MacDiv);
+                    container.insertBefore(MacDiv, container.firstChild);
+                    const MacFirstChildDiv = MacDiv.querySelector('div');
+                    if (MacFirstChildDiv) {
+                        MacFirstChildDiv.setAttribute('x-data', '{ expanded: true }');
+                    }
+                    break;
+                case 'Android':
+                    container.removeChild(androidDiv);
+                    container.insertBefore(androidDiv, container.firstChild);
+                    const androidFirstChildDiv = androidDiv.querySelector('div');
+                    console.log(androidFirstChildDiv);
+                    if (androidFirstChildDiv) {
+                        androidFirstChildDiv.setAttribute('x-data', '{ expanded: true }');
+                    }
+                    break;
+                case 'Windows':
+                    container.removeChild(windowsDiv);
+                    container.insertBefore(windowsDiv, container.firstChild);
+                    const windowsFirstChildDiv = windowsDiv.querySelector('div');
+                    if (windowsFirstChildDiv) {
+                        windowsFirstChildDiv.setAttribute('x-data', '{ expanded: true }');
+                    }
+                    break;
+                default:
+                    // Handle other cases or do nothing for unsupported OS
+                    break;
+            }
+        }
+
+        function renderConfigs() {
+            const subLinks = "{{ user.links }}"
+            const configsElement = document.querySelector("#configs_section")
+            const cleanedString = subLinks.replace(/[\[\]']/g, '');
+
+            // Split the cleaned string into an array using ', ' (comma and space) as the delimiter
+            const configArray = cleanedString.split(', ');
+            configArray.forEach((cfg, index) => {
+                configsElement.innerHTML += `
+            <div class="flex items-center bg-slate-900 px-4 py-2 rounded-lg">
+                                    <span class="flex-1">${extractNameFromConfigURL(cfg)}</span>
+                                    <div class="flex items-center justify-start gap-x-2">
+                                        <div class="w-10 h-10 overflow-hidden">
+                                            <button id="copyCfg-${index}" onclick="copyToClipboard(event,'${cfg}')" data-tooltip-target="copyLink" type="button" class="btnCopy">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff" class="w-8 h-8 fill-white">
+  <path fill-rule="evenodd" d="M10.5 3A1.501 1.501 0 009 4.5h6A1.5 1.5 0 0013.5 3h-3zm-2.693.178A3 3 0 0110.5 1.5h3a3 3 0 012.694 1.678c.497.042.992.092 1.486.15 1.497.173 2.57 1.46 2.57 2.929V19.5a3 3 0 01-3 3H6.75a3 3 0 01-3-3V6.257c0-1.47 1.073-2.756 2.57-2.93.493-.057.989-.107 1.487-.15z" clip-rule="evenodd" />
+</svg>
+
+                                            </button>
+                                            <div x-text="$t('copyLink')" id="copyLink" role="tooltip"
+                                                class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+
+                                                <div class="tooltip-arrow" data-popper-arrow></div>
+                                            </div>
+                                        </div>
+                                        <div class="w-10 h-10 overflow-hidden">
+
+                                            <button onclick="openDynamicModal(extractNameFromConfigURL('${cfg}'), '${cfg}')" data-tooltip-target="qrCode" type="button" class="">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#fff" class="w-8 h-8 fill-white">
+  <path fill-rule="evenodd" d="M3 4.875C3 3.839 3.84 3 4.875 3h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013 9.375v-4.5zM4.875 4.5a.375.375 0 00-.375.375v4.5c0 .207.168.375.375.375h4.5a.375.375 0 00.375-.375v-4.5a.375.375 0 00-.375-.375h-4.5zm7.875.375c0-1.036.84-1.875 1.875-1.875h4.5C20.16 3 21 3.84 21 4.875v4.5c0 1.036-.84 1.875-1.875 1.875h-4.5a1.875 1.875 0 01-1.875-1.875v-4.5zm1.875-.375a.375.375 0 00-.375.375v4.5c0 .207.168.375.375.375h4.5a.375.375 0 00.375-.375v-4.5a.375.375 0 00-.375-.375h-4.5zM6 6.75A.75.75 0 016.75 6h.75a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-.75A.75.75 0 016 7.5v-.75zm9.75 0A.75.75 0 0116.5 6h.75a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-.75zM3 14.625c0-1.036.84-1.875 1.875-1.875h4.5c1.036 0 1.875.84 1.875 1.875v4.5c0 1.035-.84 1.875-1.875 1.875h-4.5A1.875 1.875 0 013 19.125v-4.5zm1.875-.375a.375.375 0 00-.375.375v4.5c0 .207.168.375.375.375h4.5a.375.375 0 00.375-.375v-4.5a.375.375 0 00-.375-.375h-4.5zm7.875-.75a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-.75zm6 0a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-.75zM6 16.5a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-.75zm9.75 0a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-.75zm-3 3a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-.75zm6 0a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-.75z" clip-rule="evenodd" />
+</svg>
+
+                                            </button>
+                                            <div x-text="$t('qrCode')" id="qrCode" role="tooltip"
+                                                class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+
+                                                <div class="tooltip-arrow" data-popper-arrow></div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+            `
+            })
+        }
+
+        Alpine.data('dataLimit', '0'); // Initialize Alpine data properties
+        Alpine.data('dataUsed', '0');
+
+        Alpine.start();
+    </script>
+    <script defer>
+        const dataLimit = "{% if not user.data_limit %}∞{% else %}{{ user.data_limit }}{% endif %}";
+        const dataUsed = "{{ user.used_traffic }}";
+        const expireDateInit = "{% if not user.expire %}∞{% else %}{% set current_timestamp = now().timestamp() %}{{ user.expire | datetime }}{% endif %}";
+        var tmpUsage = ((parseFloat(dataUsed) / parseFloat(dataLimit)) * 100).toFixed(2);
+        if (tmpUsage > 100) tmpUsage = 100;
+        const dataUsage = dataLimit == "∞" ? 100 : tmpUsage;
+        const dataChartColor = dataUsage < 40 ? "bg-green-500" : dataUsage < 80 ? "bg-yellow-600" : "bg-red-500";
+        const resetInterval = "{{ user.data_limit_reset_strategy.value }}";
+        let expireDateVar = expireDateInit.includes("∞") ? "∞" : localStorage.getItem("lang") == "fa" ? new Date(expireDateInit).toLocaleString("fa-IR-u-nu-latn").replace(",", " ") : expireDateInit;
+        let appsJson = {
+            IOS: {
+                Streisand: {
+                    url: [
+                        {
+                            name: "IOS 14+",
+                            url: "https://apps.apple.com/us/app/streisand/id6450534064",
+                            best: true,
+                        },
+                    ],
+                    tutorial: "",
+                },
+                FoXray: {
+                    url: [
+                        {
+                            name: "IOS 16+",
+                            url: "https://apps.apple.com/us/app/foxray/id6448898396",
+                            best: false,
+                        },
+                    ],
+                    tutorial: "",
+                },
+                V2Box: {
+                    url: [
+                        {
+                            name: "IOS 14+",
+                            url: "https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690",
+                            best: false,
+                        },
+                    ],
+                    tutorial: "",
+                },
+                Shadowrocket: {
+                    url: [
+                        {
+                            name: "$3.99",
+                            url: "https://apps.apple.com/ca/app/shadowrocket/id932747118",
+                            best: false,
+                        },
+                    ],
+                    tutorial: "",
+                },
+            },
+            Android: {
+                v2rayNG: {
+                    url: [
+                        {
+                            name: "GooglePlay",
+                            url: "https://play.google.com/store/apps/details?id=com.v2ray.ang",
+                            best: true,
+                        },
+                        {
+                            name: "Github",
+                            url: "https://github.com/2dust/v2rayNG/releases/download/1.8.5/v2rayNG_1.8.5.apk",
+                            best: false,
+                        },
+                    ],
+                    tutorial: "",
+                },
+                NekoBox: {
+                    url: [
+                        {
+                            name: "Arm64",
+                            url: "https://github.com/MatsuriDayo/NekoBoxForAndroid/releases/download/1.1.4/NB4A-1.1.4-arm64-v8a.apk",
+                            best: false,
+                        },
+                        {
+                            name: "Armeabi",
+                            url: "https://github.com/MatsuriDayo/NekoBoxForAndroid/releases/download/1.1.4/NB4A-1.1.4-armeabi-v7a.apk",
+                            best: false,
+                        },
+                    ],
+                    tutorial: "",
+                },
+            },
+            Windows: {
+                nekoray: {
+                    url: [
+                        {
+                            name: "",
+                            url: "https://github.com/MatsuriDayo/nekoray/releases/download/3.8/nekoray-3.8-2023-06-14-windows64.zip",
+                            best: true,
+                        },
+                    ],
+                    tutorial: "",
+                },
+                v2rayN: {
+                    url: [
+                        {
+                            name: "",
+                            url: "https://github.com/2dust/v2rayN/releases/download/6.27/zz_v2rayN-With-Core-SelfContained.7z",
+                            best: false,
+                        },
+                    ],
+                    tutorial: "",
+                },
+            },
+        };
+        let langJson = {
+            ru: {
+                active: "Оплачено",
+                limited: "Ограничен",
+                expired: "Требуется оплата",
+                disabled: "Отключен",
+                dataUsage: "Использовано данных: ",
+                expirationDate: "Дата окончания срока: ",
+                resetIntervalDay: "(сбрасывает каждый день)",
+                resetIntervalWeek: "(сбрасывается каждую неделю)",
+                resetIntervalMonth: "(сбрасывается каждый месяц)",
+                resetIntervalYear: "(сбрасывается каждый год)",
+                remainingDays: "Оставшиеся дни: ",
+                remainingDaysSufix: " дней",
+                links: "ссылки",
+                apps: "Скачать программы",
+                Android: "Android",
+                iOS: "iOS",
+                Windows: "Windows",
+                macOS: "macOS",
+                tutorials: "инструкции",
+                subscription: "подписка",
+                language: "язык",
+                settings: "настройки",
+                darkMode: "тёмный режим",
+                copyAll: "скопировать все",
+                proxy: "прокси",
+                tutorial: "руководство",
+                download: "Скачать",
+                telchannel: "Телеграм-канал",
+                telsupport: "Поддержка Telegram",
+                telProxy: "Прокси-сервер Telegram",
+                v2rayNG: "Android - Download v2rayNG",
+                NekoBox: "Android - Download NekoBox",
+                SingBox: "Android - Download SingBox",
+                Streisand: "iOS - Download Streisand",
+                FoXray: "iOS - Downaload FoXray",
+                V2Box: "iOS - Download v2Box",
+                addto: "Быстрая настройка",
+                addV2rayNG: "v2rayNG",
+                addStreisand: "Streisand",
+                addFoXray: "FoXray",
+                addNekoBox: "NekoBox",
+                addV2Box: "v2Box",
+                addShadowrocket: "Shadowrocket",
+                addsingbox: "Sing-Box",
+                addV2rayN: "v2rayN",
+                addnekoray: "Nekoray",
+                addhiddify: "Hiddify Next",
+                addClash: "Clash",
+                addClashMeta: "Clash Meta",
+                addClashVerge: "Clash Verge",
+                addClashX: "Clash X",
+                install: "Нажмите на следующие кнопки, чтобы загрузить программу для вашей операционной системы!",
+                support: "Поддержка",
+                telchanel: "Канал телеграм",
+                oneClick: "Для быстрой установки конфига, выберите приложение, которое вы используете!",
+                restofusage: "Использовано данных",
+                needediOS: "Нужна версия iOS: ",
+                neededmacOS: "Нужна версия macOS: ",
+                clickForDownload: "Нажмите на ссылку ниже, чтобы загрузить программу",
+                clickForAdd: "Нажмите на ссылку ниже, чтобы добавить конфигурации в программу",
+                clickConfig: "Чтобы ВПН можно было не выключать. Не будет затрагивать работу русских приложений.",
+                copyLink: "Копировать",
+                qrCode: "QrCode",
+                downloadApp: "1. Скачайте программу",
+                addConfigs: "2. Добавьте конфиги",
+                addConfig: "3. Добавить конфигурацию",
+                AddtoApp: "Добавить в приложение",
+                myConfigs: "Мои конфиги",
+                copyAllCfgs: "Скопировать ссылку подписки",
+                copied: "Скопировано",
+                clickOutClose: "Нажмите за пределами окна, чтобы закрыть.",
+                chooseApp: "Выберите нужную вам программу",
+                routingTitle: "Роутинг — рекоммендуется",
+                routingInfo: "При добавлении роутинга, сайты внутри страны будут открываться без VPN",
+                routingIR: "Добавить Иранские сайты",
+                routingRU: "Добавить правило: Всё через  VPN. Сайты РФ напрямую",
+                myiOS: 'Моя версия IOS: ',
+                v2rayNGs3: "3. Обновите подписку",
+                v2rayNGs3Info: "Нажмите для подсказки",
+                howToConnect: "Как подключиться?",
+                connectInfo: "Воспользоваться подпиской можно через следующее меню для нужной операционной системы",
+                macInfo: "Примечание: подключение на Mac OS аналогично IOS",
+                generalAccess: "Общий доступ",
+                generalAccessInfo: "В этом разделе вы получаете доступ к своим конфигурациям по отдельности, что позволяет делиться каждой из них с помощью QR-кода или просто копировать их.",
+                supTelInfo: "Если возникнут проблемы, обратитесь в службу поддержки в Telegram"
+            },
+        };
+        let settings = {
+            language: "ru",
+        };
+
+        function checkLang() {
+            window.AlpineI18n.fallbackLocale = "fa";
+            let locale = localStorage.getItem("lang") ?? settings.language;
+            window.AlpineI18n.create(locale, langJson);
+            AlpineI18n.locale = locale;
+            document.body.setAttribute("dir", locale == "fa" ? "rtl" : "ltr");
+        }
+
+        document.addEventListener("alpine-i18n:ready", () => {
+            checkLang()
+            renderOS()
+            // getQrIcon()
+        });
+
+        // Function to set the selected language in local storage
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // const progressBar = document.getElementById('progress__bar')
+            // progressBar.style.setProperty("--value", dataUsage)
+            renderOS()
+            setHrefs()
+            renderConfigs()
+            const iOSVer = iOSversion()
+            if (iOSVer) {
+                document.querySelector('#iOSVer').innerHTML = ""
+                document.querySelector('#iOSVer').innerHTML = `<div class="flex items-center gap-x-2 mb-4">
+                                                    <span x-text="$t('myiOS')"></span>
+                                                    <div
+                                                        class="flex items-center rtl:flex-row-reverse rtl:justify-end gap-x-1">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <g clip-path="url(#clip0_23_24)">
+                                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                                    d="M4.36364 0C3.20633 0 2.09642 0.459739 1.27808 1.27808C0.459739 2.09642 0 3.20633 0 4.36364V19.6364C0 20.7937 0.459739 21.9036 1.27808 22.7219C2.09642 23.5403 3.20633 24 4.36364 24H19.6364C20.7937 24 21.9036 23.5403 22.7219 22.7219C23.5403 21.9036 24 20.7937 24 19.6364V4.36364C24 3.20633 23.5403 2.09642 22.7219 1.27808C21.9036 0.459739 20.7937 0 19.6364 0H4.36364ZM3.81818 8.82109C3.81818 8.53176 3.93312 8.25429 4.1377 8.0497C4.34229 7.84512 4.61976 7.73018 4.90909 7.73018C5.19842 7.73018 5.47589 7.84512 5.68048 8.0497C5.88507 8.25429 6 8.53176 6 8.82109C6 9.11042 5.88507 9.3879 5.68048 9.59248C5.47589 9.79707 5.19842 9.912 4.90909 9.912C4.61976 9.912 4.34229 9.79707 4.1377 9.59248C3.93312 9.3879 3.81818 9.11042 3.81818 8.82109ZM14.4545 10.9091C14.4545 9.912 15.3665 8.45455 17.4545 8.45455C18.2564 8.45455 18.9818 8.844 19.4782 9.25745C19.7345 9.47127 19.9604 9.71564 20.1295 9.96982C20.2833 10.2 20.4545 10.5338 20.4545 10.9091H18.8182C18.8182 10.9495 18.8236 10.9735 18.8247 10.9789C18.8095 10.9432 18.7905 10.9092 18.768 10.8775C18.6726 10.7416 18.5588 10.6197 18.4298 10.5153C18.1091 10.2469 17.7425 10.0909 17.4545 10.0909C16.2753 10.0909 16.0931 10.8087 16.0909 10.908C16.0876 10.9036 16.0887 10.908 16.0909 10.9091V10.908C16.1567 10.9741 16.2344 11.027 16.32 11.064C16.632 11.22 17.0793 11.3356 17.6531 11.4785L17.7022 11.4916C18.2105 11.6182 18.8302 11.7731 19.32 12.0185C19.8349 12.276 20.4545 12.7636 20.4545 13.6364C20.4545 14.6335 19.5425 16.0909 17.4545 16.0909C15.3665 16.0909 14.4545 14.6335 14.4545 13.6364H16.0909C16.0909 13.7302 16.2698 14.4545 17.4545 14.4545C18.6338 14.4545 18.816 13.7367 18.8182 13.6375C18.8215 13.6418 18.8204 13.6375 18.8182 13.6364V13.6375C18.7524 13.5714 18.6747 13.5184 18.5891 13.4815C18.2771 13.3255 17.8298 13.2098 17.256 13.0669L17.2069 13.0538C16.6985 12.9273 16.0789 12.7724 15.5891 12.5269C15.0742 12.2695 14.4545 11.7818 14.4545 10.9091ZM8.45455 12.2727C8.45455 10.9931 9.38182 10.0909 10.3636 10.0909C11.3455 10.0909 12.2727 10.9931 12.2727 12.2727C12.2727 13.5524 11.3455 14.4545 10.3636 14.4545C9.38182 14.4545 8.45455 13.5524 8.45455 12.2727ZM10.3636 8.45455C8.33455 8.45455 6.81818 10.2393 6.81818 12.2727C6.81818 14.3062 8.33455 16.0909 10.3636 16.0909C12.3927 16.0909 13.9091 14.3062 13.9091 12.2727C13.9091 10.2393 12.3927 8.45455 10.3636 8.45455ZM4.09091 16.0909V10.3636H5.72727V16.0909H4.09091Z"
+                                                                    fill="white" />
+                                                            </g>
+                                                            <defs>
+                                                                <clipPath id="clip0_23_24">
+                                                                    <rect width="24" height="24" fill="white" />
+                                                                </clipPath>
+                                                            </defs>
+                                                        </svg>
+                                                        <span class="text-sm">${iOSVer}</span>
+                                                    </div>
+                                                </div>`
+            }
+
+
+
+            const countriesSelect = document.getElementById("countries");
+            function setLanguage() {
+                var selectedLanguage = countriesSelect.value;
+                localStorage.setItem("lang", selectedLanguage);
+                checkLang()
+            }
+
+            // Function to load the selected language from local storage
+            function loadLanguage() {
+                var selectedLanguage = localStorage.getItem("lang");
+                if (selectedLanguage) {
+                    countriesSelect.value = selectedLanguage;
+                }
+            }
+
+
+            // Attach event listener to the select box to update local storage when changed
+            countriesSelect.addEventListener("change", setLanguage);
+
+            // Load the selected language on page load
+            window.addEventListener("load", loadLanguage);
+
+            // Trigger the "change" event on page load to apply the saved language
+            var event = new Event("change");
+            countriesSelect.dispatchEvent(event);
+
+
+            const copyButton = document.getElementById("copyBtn");
+            copyButton.addEventListener("click", function () {
+                console.log('clicked');
+                // Text to copy
+                const subLinks = "{{ user.subscription_url }}"
+
+                const cleanedString = subLinks.replace(/[\[\]']/g, '');
+
+                // Split the cleaned string into an array using ', ' (comma and space) as the delimiter
+                const configArray = cleanedString.split(', ');
+
+                // Join the array elements into a single string with each configuration on a separate line
+                const result = configArray.join('\n');
+
+                const copyText = document.querySelector('#copyText')
+
+                copyToClipboard(null, result)
+
+                const defaultContent = copyText.innerHTML;
+
+                copyText.innerHTML = `
+                    <div class="flex items-center justify-start gap-x-1">
+                        <lord-icon class="w-8 h-8" src="https://cdn.lordicon.com/jvihlqtw.json" trigger="loop"
+                                delay="1" colors="primary:#fff,secondary:#fff">
+                            </lord-icon>
+                            <span x-text="$t('copied')">/span>
+                        </div>
+                `
+
+                setTimeout(function () {
+                    copyText.innerHTML = defaultContent;
+                }, 3000);
+            });
+        })
+    </script>
+    <style>
+        .asli {
+            width: 700px;
+            margin: 0 auto;
+        }
+        h2 {
+            color: #333;
+        }
+        .block_hidden {
+            display: none;
+        }
+        .overflow-hidden {
+            overflow: visible;
+        }
+        .opacity-0 {
+            opacity: 1;
+        }
+        lord-icon {
+            display: none;
+        }
+        h3 {
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            color: #333 !important;
+            text-align: left;
+        }
+        .my_flex {
+            color: #333;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .my_flex p {
+            color: #333;
+            margin: 0 4px 0 0;
+        }
+        .my_flex span {
+            line-height: 1.5rem;
+            display: block;
+        }
+        #faqs-text-01 a {
+            border: 1px solid #333;
+            padding: 15px 20px 15px 100px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: block;
+            position: relative;
+        }
+        #faqs-text-01 a::after {
+            content: '';
+            width: 56px;
+            height: 56px;
+            background: url(/1.svg) no-repeat center, #b5d2ec;
+            background-size: 40px;
+            border-radius: 8px;
+            position: absolute;
+            top: 15px;
+            left: 20px;
+        }
+        #faqs-text-01 a:nth-child(2)::after {
+            background: url(/2.svg) no-repeat center, #b5ecc6;
+            background-size: 30px;
+        }
+        #faqs-text-01 a:nth-child(3)::after {
+            background: url(/3.svg) no-repeat center, #ebecb5;
+            background-size: 30px;
+        }
+        .p-4 {
+            padding: 0;
+            display: grid;
+            gap: 10px;
+        }
+        .gap-y-4 {
+            row-gap: 1.2rem;
+        }
+        .text-white {
+            color: #333;
+        }
+        .modal_btn {
+            cursor: pointer;
+        }
+        .modal_image {
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 99;
+            overflow-y: scroll;
+        }
+        .modal_image.active {
+            display: block;
+        }
+        .close__modal {
+            width: 30px;
+            height: 30px;
+            background: url(close.svg) no-repeat;
+            background-size: 100%;
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.7;
+            cursor: pointer;
+        }
+        .box__modal {
+            width: 400px;
+            text-align: center;
+            padding: 90px 0 0;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 101;
+        }
+        .box__modal img {
+            width: 100%;
+            object-fit: cover;
+            margin: 40px auto;
+            display: block;
+        }
+        .text__modal {
+            color: #fff;
+        }
+        .fon__modal {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .8);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+        .caption_cat {
+            font-size: 1.5rem;
+            padding: 30px 0 20px;
+        }
+        .connect_btn {
+            width: max-content;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+        }
+        .connect_btn span {
+            color: #fff;
+            line-height: 24px;
+        }
+        .accor_menu {
+            font-size: 1.2rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px 20px;
+            display: block;
+            position: relative;
+            cursor: pointer;
+        }
+        .accor_menu::after {
+            content: '';
+            width: 24px;
+            height: 24px;
+            background: url(/4.svg) no-repeat;
+            background-size: cover;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+        }
+        .accor_menu.active::after {
+            transform: rotate(180deg);
+        }
+        .cont_menu {
+            display: none;
+        }
+        .cont_menu.active {
+            display: block;
+        }
+        .iOSContainer, .WindowsContainer, .AndroidContainer {
+            display: block;
+        }
+        .iOSContainer.active, .WindowsContainer.active, .AndroidContainer.active {
+            display: block;
+        }
+        @media (max-width: 767px) {
+            .asli {
+                width: 90%;
+            }
+            .caption_cat {
+                font-size: 1.3rem;
+            }
+            .my_flex, .modal_btn {
+                margin: 5px 0 0;
+            }
+            #faqs-text-01 a {
+                padding: 10px 20px 15px 70px;
+            }
+            #faqs-text-01 a::after {
+                width: 46px;
+                height: 46px;
+                background-size: 30px;
+                top: 10px;
+                left: 10px;
+            }
+            h3 {
+                font-size: 1rem !important;
+            }
+        }
+        @media (max-width: 540px) {
+            .box__modal {
+                width: 90%;
+                margin: 0 auto;
+            }
+        }
+        @media (max-width: 390px) {
+            .connect_btn {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <script>
+        window.addEventListener("DOMContentLoaded", (event) => {
+            let modalWind = document.querySelector('.modal_image');
+            let btnModal = document.querySelector('.modal_btn');
+            let fonModal = document.querySelector('.fon__modal');
+            let closeModal = document.querySelector('.close__modal');
+            let accorMenu = document.querySelector('.accor_menu');
+            let contMenu = document.querySelector('.cont_menu');
+            let body = document.querySelector('body');
+
+            btnModal.addEventListener('click', function() {
+                modalWind.classList.add('active');
+                body.style.overflow = "hidden";
+            });
+            fonModal.addEventListener('click', function() {
+                modalWind.classList.remove('active');
+                body.style.overflow = "";
+            });
+            closeModal.addEventListener('click', function() {
+                modalWind.classList.remove('active');
+                body.style.overflow = "";
+            });
+            accorMenu.addEventListener('click', function() {
+                this.classList.toggle('active');
+                contMenu.classList.toggle('active');
+            });
+
+            var userDeviceArray = [
+                {device: 'Android', platform: /Android/},
+                {device: 'iPhone', platform: /iPhone/},
+                {device: 'iPad', platform: /iPad/},
+                {device: 'Symbian', platform: /Symbian/},
+                {device: 'Windows Phone', platform: /Windows Phone/},
+                {device: 'Tablet OS', platform: /Tablet OS/},
+                {device: 'Linux', platform: /Linux/},
+                {device: 'Windows', platform: /Windows NT/},
+                {device: 'Macintosh', platform: /Macintosh/}
+            ];
+
+            var platform = navigator.userAgent;
+
+            function getPlatform() {
+                for (var i in userDeviceArray) {
+                    if (userDeviceArray[i].platform.test(platform)) {
+                        return userDeviceArray[i].device;
+                    }
+                }
+                return 'Неизвестная платформа!' + platform;
+            }
+                
+            let windows = document.querySelector('.WindowsContainer');
+            let iOS = document.querySelector('.iOSContainer');
+            let android = document.querySelector('.AndroidContainer');
+
+            if (getPlatform() == 'Windows') {
+                windows.classList.add('active');
+            } else if (getPlatform() == 'iPhone' || getPlatform() == 'iPad') {
+                iOS.classList.add('active');
+            } else if (getPlatform() == 'Android' || getPlatform() == 'iPad') {
+                android.classList.add('active');
+            } else {
+                windows.classList.add('active');
+                iOS.classList.add('active');
+                android.classList.add('active');
+            }
+        });
+    </script>
+</head>
+
+<body class="font-body" x-data>
+    <div class="modal_image">
+        <div class="box__modal">
+            <div class="close__modal"></div>
+            <div class="text__modal">Для отображения ключа в программе: нажмите три точки вверху слева</div>
+            <img class="rounded-2xl w-full"
+                src="modal_1.png"
+                alt="v2rayNG Step 1">
+            <div class="text__modal">Затем в меню выберете пункт: обновить подписку. И для подключения к ВПН нажмите кнопку “V” снизу справа.</div>
+            <img class="rounded-2xl w-full"
+                src="modal_2.png"
+                alt="v2rayNG Step 2">
+        </div>
+        <div class="fon__modal"></div>
+    </div>
+    <input type="checkbox" id="QrModal" class="modal-toggle" />
+    <div style="direction: ltr;" class="modal">
+        <div class="modal-box">
+            <h3 class="text-lg font-bold" id="modalTitle">Dynamic Title</h3>
+            <div class="flex items-center justify-center mt-8 mb-4 bg-white py-4 rounded-3xl" id="qrcode"></div>
+            <p x-text="$t('clickOutClose')" class="text-center" id="modalContent"></p>
+        </div>
+        <label class="modal-backdrop" for="QrModal">Close</label>
+    </div>
+
+    <div class="asli" id="page-container">
+        <div id="OsContainer">
+            <div id="WindowsContainer" class="WindowsContainer">
+                <div class="caption_cat">Windows</div>
+                    <!-- Accordion item -->
+                    <div x-data="{ expanded: false }">
+                        <div role="region" aria-labelledby="faqs-title-01">
+                            <!-- Accordion item -->
+                            <div x-data="{ expanded: false }">
+                                <div id="faqs-text-01" role="region" aria-labelledby="faqs-title-01">
+                                    <a href="https://github.com/hiddify/hiddify-next/releases/download/v0.10.0/hiddify-windows-x64-setup.zip" target="_blank">
+                                        <h3 x-text="$t('downloadApp')"></h3>
+                                        <div class="my_flex">
+                                            <p x-text="$t('clickForDownload')"></p>
+                                            <span>Hiddify Next</span>
+                                        </div>
+                                    </a>
+                                    <a href="clash://install-config?url={{ user.subscription_url }}" rel="noopener noreferrer" target="_blank">
+                                    <!-- <a id="windows-clashverge"> -->
+                                        <h3 x-text="$t('addConfigs')"></h3>
+                                        <div class="my_flex">
+                                            <p x-text="$t('clickForAdd')"></p>
+                                            <span>Hiddify Next</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+            <div id="iOSContainer" class="iOSContainer">
+                <div class="caption_cat">IOS</div>
+                <!-- Accordion item -->
+                <div x-data="{ expanded: false }">
+                    <div role="region" aria-labelledby="faqs-title-01">
+                        <div id="iOSVer"></div>
+                        <!-- Accordion item -->
+                        <div x-data="{ expanded: false }">
+                            <div id="faqs-text-01" role="region" aria-labelledby="faqs-title-01">
+                                <a href="https://apps.apple.com/us/app/streisand/id6450534064" target="_blank">
+                                    <h3 x-text="$t('downloadApp')"></h3>
+                                    <div class="my_flex">
+                                        <p x-text="$t('clickForDownload')"></p>
+                                        <span x-text="$t('addStreisand')"></span>
+                                    </div>
+                                </a>
+                                <a href="streisand://import/{{ user.subscription_url }}#NAME" rel="noopener noreferrer" target="_blank">
+                                <!-- <a id="ios-streisand"> -->
+                                    <h3 x-text="$t('addConfigs')"></h3>
+                                    <div class="my_flex">
+                                        <p x-text="$t('clickForAdd')"></p>
+                                        <span x-text="$t('addStreisand')"></span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Accordion item -->
+                        <div x-data="{ expanded: false }">
+                            <div id="faqs-text-01" role="region" aria-labelledby="faqs-title-01">
+                                <a href="streisand://aW1wb3J0L3JvdXRlOi8vWW5Cc2FYTjBNRERWQVFJREJBVUdMaTh3TVZWeWRXeGxjMTFrYjIxaGFXNU5ZWFJqYUdWeVZHNWhiV1ZlWkc5dFlXbHVVM1J5WVhSbFozbFVkWFZwWktRSEdpTW8wd2dKQ2dzTURWdHZkWFJpYjNWdVpGUmhaMTFrYjIxaGFXNU5ZWFJqYUdWeVZtUnZiV0ZwYmxWd2NtOTRlVlpzYVc1bFlYS3NEZzhRRVJJVEZCVVdGeGdaWHhBUloyVnZjMmwwWlRwcGJuTjBZV2R5WVcxZkVBOW5aVzl6YVhSbE9uUjNhWFIwWlhKZkVCQm5aVzl6YVhSbE9tWmhZMlZpYjI5clh4QVZaMlZ2YzJsMFpUcGpZWFJsWjI5eWVTMXdiM0p1WG1kbGIzTnBkR1U2ZEhkcGRHTm9YeEFQWjJWdmMybDBaVHB3YjNKdWFIVmlYbWRsYjNOcGRHVTZkR2xyZEc5clh4QVBaMlZ2YzJsMFpUcDFZbWx6YjJaMFh4QVBaMlZ2YzJsMFpUcHpjRzkwYVdaNVhtZGxiM05wZEdVNmIzQmxibUZwWHhBUVoyVnZjMmwwWlRweWIyTnJjM1JoY2xocmFXNXZMbkIxWXRRYkNod2REQjRoSWwxa2IyMWhhVzVOWVhSamFHVnlVbWx3VzI5MWRHSnZkVzVrVkdGbm9oOGdYeEFYWjJWdmMybDBaVHBqWVhSbFoyOXllUzFuYjNZdGNuVmZFQTluWlc5emFYUmxPbkJ5YVhaaGRHV2dWbVJwY21WamROTWNKQ1VtRENKZFpHOXRZV2x1VFdGMFkyaGxjbHR2ZFhSaWIzVnVaRlJoWjZFbldUQXVNQzR3TGpBdk1OTXBLZ29pREN0YmIzVjBZbTkxYm1SVVlXZGRaRzl0WVdsdVRXRjBZMmhsY3FJc0xWOFFFR2RsYjNOcGRHVTZkR1ZzWldkeVlXMWZFQkJuWlc5emFYUmxPbmRvWVhSellYQndWbWg1WW5KcFpGZFdaWHBoY25selhFbFFTV1pPYjI1TllYUmphRjhRSkVZNFJrRTNNekJGTFRjNFEwRXRORU13TmkxQk5rTTBMVE0yTkRrMk56Z3hNa0pHTkFBSUFCTUFHUUFuQUN3QU93QkFBRVVBVEFCWUFHWUFiUUJ6QUhvQWh3Q2JBSzBBd0FEWUFPY0ErUUVJQVJvQkxBRTdBVTRCVndGZ0FXNEJjUUY5QVlBQm1nR3NBYTBCdEFHN0Fja0IxUUhYQWVFQjZBSDBBZ0lDQlFJWUFpc0NNZ0k2QWtjQUFBQUFBQUFDQVFBQUFBQUFBQUF5QUFBQUFBQUFBQUFBQUFBQUFBQUNiZz09">
+                                    <h3 x-text="$t('addConfig')"></h3>
+                                    <div class="my_flex">
+                                        <p x-text="$t('clickConfig')"></p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Accordion item -->
+                        <div x-data="{ expanded: false }">
+                            <span x-text="$t('addV2Box')" class="accor_menu"></span>
+                            <div id="faqs-text-01" role="region" aria-labelledby="faqs-title-01" class="cont_menu">
+                                <a href="https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690" target="_blank">
+                                    <h3 x-text="$t('downloadApp')"></h3>
+                                    <div class="my_flex">
+                                        <p x-text="$t('clickForDownload')"></p>
+                                        <span x-text="$t('addV2Box')"></span>
+                                    </div>
+                                </a>
+                                <a href="v2box://install-sub?url={{ user.subscription_url }}&name=Sub" rel="noopener noreferrer" target="_blank">
+                                <!-- <a id="ios-v2box"> -->
+                                    <h3 x-text="$t('addConfigs')"></h3>
+                                    <div class="my_flex">
+                                        <p x-text="$t('clickForAdd')"></p>
+                                        <span x-text="$t('addV2Box')"></span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p x-text="$t('macInfo')"></p>
+            </div>
+            
+            <div id="AndroidContainer" class="AndroidContainer">
+                <div class="caption_cat">Android</div>
+                <div x-data="{ expanded: false }">
+                    <div role="region" aria-labelledby="faqs-title-01">
+                        <!-- Accordion item -->
+                        <div x-data="{ expanded: false }">
+                            <div id="faqs-text-01" role="region" aria-labelledby="faqs-title-01">
+                                <a href="https://github.com/2dust/v2rayNG/releases/download/1.8.9/v2rayNG_1.8.9.apk" target="_blank">
+                                    <h3 x-text="$t('downloadApp')"></h3>
+                                    <div class="my_flex">
+                                        <p x-text="$t('clickForDownload')"></p>
+                                        <span x-text="$t('addV2rayNG')"></span>
+                                    </div>
+                                </a>
+                                <a href="v2rayng://install-config?url={{ user.subscription_url }}" rel="noopener noreferrer" target="_blank">
+                                <!-- <a id="android-v2rayng"> -->
+                                    <h3 x-text="$t('addConfigs')"></h3>
+                                    <div class="my_flex">
+                                        <p x-text="$t('clickForAdd')"></p>
+                                        <span x-text="$t('addV2rayNG')"></span>
+                                    </div>
+                                </a>
+                                <a>
+                                    <div class="modal_btn">
+                                        <h3 x-text="$t('v2rayNGs3')"></h3>
+                                        <p x-text="$t('v2rayNGs3Info')"></p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
